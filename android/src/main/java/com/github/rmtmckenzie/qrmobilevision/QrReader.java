@@ -9,7 +9,6 @@ import android.graphics.SurfaceTexture;
 import android.os.Build;
 import android.util.Log;
 
-import com.google.android.gms.vision.CameraSource;
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions;
 
 import java.io.IOException;
@@ -20,7 +19,6 @@ class QrReader {
     private final Activity context;
     private final QRReaderStartedCallback startedCallback;
     private Heartbeat heartbeat;
-    private CameraSource camera;
 
     QrReader(int width, int height, Activity context, BarcodeScannerOptions options,
              final QRReaderStartedCallback startedCallback, final QrReaderCallbacks communicator,
@@ -28,13 +26,8 @@ class QrReader {
         this.context = context;
         this.startedCallback = startedCallback;
 
-        if (android.os.Build.VERSION.SDK_INT >= 21) {
-            Log.i(TAG, "Using new camera API.");
-            qrCamera = new QrCameraC2(width, height, texture, context, new QrDetector(communicator, options));
-        } else {
-            Log.i(TAG, "Using old camera API.");
-            qrCamera = new QrCameraC1(width, height, texture, context, new QrDetector(communicator, options));
-        }
+        Log.i(TAG, "Using new camera API.");
+        qrCamera = new QrCameraC2(width, height, texture, context, new QrDetector(communicator, options));
     }
 
     void start(final int heartBeatTimeout) throws IOException, NoPermissionException, Exception {
@@ -75,13 +68,6 @@ class QrReader {
             heartbeat.stop();
         }
 
-        if (camera != null) {
-            camera.stop();
-            // also stops detector
-            camera.release();
-
-            camera = null;
-        }
         qrCamera.stop();
     }
 
